@@ -10,9 +10,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import javax.xml.crypto.Data;
+
 public class ArduinoBoard {
 
-	SerialPort port;
+	private CommPort port;
+	private SerialPort serialPort;
+	private InputStream in;
+	boolean connected;
 
 	public ArduinoBoard(String port) throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException {
 		CommPortIdentifier portIdentifier = CommPortIdentifier
@@ -20,16 +25,12 @@ public class ArduinoBoard {
 		if (portIdentifier.isCurrentlyOwned()) {
 			System.err.println("Error: Port is currently in use");
 		} else {
-			CommPort commPort = portIdentifier.open(this.getClass().getName(), 2000);
-			if (commPort instanceof SerialPort) {
-				this.port = (SerialPort) commPort;
-				this.port.setSerialPortParams(9600, SerialPort.DATABITS_8,
-						SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-			}
+			this.port = portIdentifier.open(this.getClass().getName(), 2000);
+
 		}
 	}
 
-	public static void listPorts() {
+	public static void listOpenComputerPorts() {
 		java.util.Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier
 				.getPortIdentifiers();
 		while (portEnum.hasMoreElements()) {
@@ -56,21 +57,60 @@ public class ArduinoBoard {
 		}
 	}
 
-	public InputStream getSerialStream() throws IOException {
-		return this.port.getInputStream();
+	public boolean connect() {
+		try {
+			if (this.port instanceof SerialPort) {
+				this.serialPort = (SerialPort) this.port;
+				this.serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8,
+						SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+			}
+			this.in = this.port.getInputStream();
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
 
+		this.setConnected(true);
+		return true;
+
+	}
+	
+	public void setConnected(boolean state) {
+		this.connected = state;
+	}
+	
+	public boolean isConnected() {
+		return this.connected;
+	}
+
+	public String readSerialLine() {
+		StringBuilder sb = new StringBuilder();
+		try {
+			byte data;
+			do {
+				data = (byte) this.in.read();
+				if (data != -1) {
+					sb.append((char) data);
+				}
+			} while (data != '\n');
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return sb.toString().trim();
 	}
 
 	public static void main(String[] args) throws Exception {
 		ArduinoBoard ardu = new ArduinoBoard("COM7");
-		InputStream in = ardu.getSerialStream();
-		InputStreamReader inr = new InputStreamReader(in);
-		BufferedReader br = new BufferedReader(inr);
+		boolean connected = ardu.connect();
 		
-		int line;
-		while ((line = br.read()) != 0) {
-			System.out.println(line);
+		if (ardu.isConnected()) {
+			System.out.println(ardu.readSerialLine());
+			System.out.println(ardu.readSerialLine());
+			
 		}
-		
+		System.exit(0);
+
+
 	}
 }
