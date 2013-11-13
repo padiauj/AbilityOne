@@ -14,25 +14,18 @@ import javax.xml.crypto.Data;
 
 public class ArduinoBoard {
 
+	private CommPortIdentifier portIdentifier;
 	private CommPort port;
 	private SerialPort serialPort;
 	private InputStream in;
 	boolean connected;
 
 	public ArduinoBoard(String port) throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException {
-		CommPortIdentifier portIdentifier = CommPortIdentifier
-				.getPortIdentifier(port);
-		if (portIdentifier.isCurrentlyOwned()) {
-			System.err.println("Error: Port is currently in use");
-		} else {
-			this.port = portIdentifier.open(this.getClass().getName(), 2000);
-
-		}
+		this.portIdentifier = CommPortIdentifier.getPortIdentifier(port);
 	}
 
 	public static void listOpenComputerPorts() {
-		java.util.Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier
-				.getPortIdentifiers();
+		java.util.Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
 		while (portEnum.hasMoreElements()) {
 			CommPortIdentifier portIdentifier = portEnum.nextElement();
 			System.out.println(portIdentifier.getName() + " - "
@@ -59,6 +52,13 @@ public class ArduinoBoard {
 
 	public boolean connect() {
 		try {
+
+			if (portIdentifier.isCurrentlyOwned()) {
+				System.err.println("Error: Port is currently in use");
+			} else {
+				this.port = portIdentifier.open(this.getClass().getName(), 2000);
+			}
+
 			if (this.port instanceof SerialPort) {
 				this.serialPort = (SerialPort) this.port;
 				this.serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8,
@@ -75,11 +75,19 @@ public class ArduinoBoard {
 		return true;
 
 	}
-	
+
+	public boolean hasSerial() {
+		try {
+			return in.available() > 0;
+		} catch (IOException e) {
+			return false;
+		}		
+	}
+
 	public void setConnected(boolean state) {
 		this.connected = state;
 	}
-	
+
 	public boolean isConnected() {
 		return this.connected;
 	}
@@ -102,15 +110,14 @@ public class ArduinoBoard {
 
 	public static void main(String[] args) throws Exception {
 		ArduinoBoard ardu = new ArduinoBoard("COM7");
-		boolean connected = ardu.connect();
-		
+		ardu.connect();
+		System.out.println(ardu.hasSerial());
+
 		if (ardu.isConnected()) {
 			System.out.println(ardu.readSerialLine());
 			System.out.println(ardu.readSerialLine());
-			
+
 		}
 		System.exit(0);
-
-
 	}
 }
