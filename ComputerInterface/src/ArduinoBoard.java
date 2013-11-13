@@ -111,11 +111,12 @@ public class ArduinoBoard {
 	public static void main(String[] args) throws Exception {
 		ArduinoBoard ardu = new ArduinoBoard("COM7");
 		ardu.connect();
-		System.out.println(ardu.hasSerial());
 
 		if (ardu.isConnected()) {
-			System.out.println(ardu.readSerialLine());
-			System.out.println(ardu.readSerialLine());
+			if (ardu.readSerialLine().equals("B1") ) {
+				
+				//Java Robot stuff here...
+			}
 
 		}
 		System.exit(0);
