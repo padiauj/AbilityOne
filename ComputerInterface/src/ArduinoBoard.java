@@ -5,11 +5,21 @@ import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
+import java.awt.Color;
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.xml.crypto.Data;
 
 public class ArduinoBoard {
@@ -107,16 +117,45 @@ public class ArduinoBoard {
 		}
 		return sb.toString().trim();
 	}
+	public static void showIcon(BufferedImage image) {
+		ImageIcon icon = new ImageIcon(image);
+		JLabel label = new JLabel(icon, JLabel.CENTER);
+		JOptionPane.showMessageDialog(null, label,
+				"AbilityOne Image Processing", -1);
+	}
+
+
 
 	public static void main(String[] args) throws Exception {
 		ArduinoBoard ardu = new ArduinoBoard("COM7");
 		ardu.connect();
+		Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 
+		Robot rbt = new Robot();
+		
 		if (ardu.isConnected()) {
-			if (ardu.readSerialLine().equals("B1") ) {
-				
-				//Java Robot stuff here...
+			String decision = ardu.readSerialLine();
+			if (decision.equals("B1") ) {
+				BufferedImage screen = rbt.createScreenCapture(screenRect);
+				MarkerDetector md = new MarkerDetector(screen, Color.BLACK); 
+				md.detect();
+				Marker m = md.getLargestMarker();
+
+				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
+				rbt.mousePress(InputEvent.BUTTON1_MASK);
+				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+
+
+				System.out.println(m.toString());
+
 			}
+			else if (decision.equals("B2")) {
+
+			}
+			else if (decision.equals("B3")) {
+
+			}
+
 
 		}
 		System.exit(0);
