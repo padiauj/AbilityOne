@@ -14,14 +14,8 @@ void loop() {
     buttonState = digitalRead(buttonPin);
     
     
-    if (buttonState == HIGH) {
       Serial.println("B1");
-    }
     
-    
-    
-    
-
   delay(1000);
 }
 

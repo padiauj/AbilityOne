@@ -127,20 +127,23 @@ public class ArduinoBoard {
 
 
 	public static void main(String[] args) throws Exception {
+		
+		listOpenComputerPorts();
 		ArduinoBoard ardu = new ArduinoBoard("COM7");
 		ardu.connect();
 		Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 
 		Robot rbt = new Robot();
 		
-		if (ardu.isConnected()) {
+		while (ardu.isConnected()) {
 			String decision = ardu.readSerialLine();
-			if (decision.equals("B1") ) {
+			if (decision.equals("BL") ) {
 				BufferedImage screen = rbt.createScreenCapture(screenRect);
-				MarkerDetector md = new MarkerDetector(screen, Color.BLACK); 
+				MarkerDetector md = new MarkerDetector(screen, Marker.RED); 
 				md.detect();
 				Marker m = md.getLargestMarker();
 
+				System.out.println(m);
 				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
 				rbt.mousePress(InputEvent.BUTTON1_MASK);
 				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
@@ -149,10 +152,32 @@ public class ArduinoBoard {
 				System.out.println(m.toString());
 
 			}
-			else if (decision.equals("B2")) {
+			else if (decision.equals("BM")) {
+
+				BufferedImage screen = rbt.createScreenCapture(screenRect);
+				MarkerDetector md = new MarkerDetector(screen, Marker.BLUE); 
+				md.detect();
+				Marker m = md.getLargestMarker();
+
+				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
+				rbt.mousePress(InputEvent.BUTTON1_MASK);
+				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+				System.out.println(m.toString());
 
 			}
-			else if (decision.equals("B3")) {
+			else if (decision.equals("BR")) {
+				
+				BufferedImage screen = rbt.createScreenCapture(screenRect);
+				//showIcon(screen);
+				MarkerDetector md = new MarkerDetector(screen, Marker.GREEN); 
+				md.detect();
+				Marker m = md.getLargestMarker();
+
+				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
+				rbt.mousePress(InputEvent.BUTTON1_MASK);
+				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+				System.out.println(m.toString());
+
 
 			}
 

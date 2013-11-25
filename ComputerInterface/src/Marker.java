@@ -14,7 +14,7 @@ public class Marker {
 	private int sizeInPixels;
 	private Point[] myImgCorners;
 	
-	public static Color GREEN = Color.GREEN;
+	public static Color GREEN = new Color(18,255,1);
 	public static Color RED = Color.RED;
 	public static Color BLUE = Color.BLUE;
 	

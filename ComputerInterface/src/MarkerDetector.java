@@ -21,7 +21,27 @@ public class MarkerDetector {
 	}
 
 	public boolean isMarkerColor(int x,int y){
-		return this.color.getRGB() == target.getRGB(x, y);
+		int thresh = 30;
+		
+		
+		int myred = this.color.getRed();
+		int mygreen = this.color.getGreen();
+		int myblue = this.color.getBlue();
+		
+		Color targetColor = new Color(target.getRGB(x, y));
+		
+		int tred = targetColor.getRed();
+		int tgreen = targetColor.getGreen();
+		int tblue = targetColor.getBlue();
+		
+		
+		if ((tred + thresh >= myred && tred - thresh <= myred) && (tgreen + thresh >= mygreen && tgreen - thresh <= mygreen) && (tblue + thresh >= myblue && tblue - thresh <= myblue)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+				
 	}
 
 	public ArrayList<Marker> detect() {
@@ -39,7 +59,6 @@ public class MarkerDetector {
 						markers.add(new Marker(marker,target.getHeight(),target.getWidth(), this.color));
 					}
 					marker.clear();
-					int pixelCount = 0;
 					while(!queue.isEmpty()){
 						Point p = queue.remove();
 
@@ -47,7 +66,6 @@ public class MarkerDetector {
 							if(!painted[p.y][p.x] && isMarkerColor(p.x,p.y)){
 								painted[p.y][p.x] = true;
 								marker.add(p);
-								pixelCount++;
 								queue.add(new Point(p.x + 1,p.y)); queue.add(new Point(p.x - 1,p.y));
 								queue.add(new Point(p.x,p.y + 1)); queue.add(new Point(p.x,p.y - 1));
 							}
