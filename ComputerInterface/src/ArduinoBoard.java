@@ -5,24 +5,17 @@ import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
-import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.xml.crypto.Data;
 
 public class ArduinoBoard {
 
@@ -186,7 +179,6 @@ public class ArduinoBoard {
 						rbt.mousePress(InputEvent.BUTTON1_MASK);
 						rbt.mouseRelease(InputEvent.BUTTON1_MASK);
 						System.out.println(m.toString());
-
 
 					}
 
