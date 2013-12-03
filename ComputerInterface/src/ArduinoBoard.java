@@ -6,6 +6,7 @@ import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Toolkit;
@@ -18,6 +19,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.xml.crypto.Data;
@@ -29,6 +31,8 @@ public class ArduinoBoard {
 	private SerialPort serialPort;
 	private InputStream in;
 	boolean connected;
+
+
 
 	public ArduinoBoard(String port) throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException {
 		this.portIdentifier = CommPortIdentifier.getPortIdentifier(port);
@@ -127,61 +131,71 @@ public class ArduinoBoard {
 
 
 	public static void main(String[] args) throws Exception {
-		
-		listOpenComputerPorts();
-		ArduinoBoard ardu = new ArduinoBoard("COM7");
-		ardu.connect();
-		Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 
-		Robot rbt = new Robot();
-		
-		while (ardu.isConnected()) {
-			String decision = ardu.readSerialLine();
-			if (decision.equals("BL") ) {
-				BufferedImage screen = rbt.createScreenCapture(screenRect);
-				MarkerDetector md = new MarkerDetector(screen, Marker.RED); 
-				md.detect();
-				Marker m = md.getLargestMarker();
+		if (args.length == 1) {
 
-				System.out.println(m);
-				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
-				rbt.mousePress(InputEvent.BUTTON1_MASK);
-				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
-
-
-				System.out.println(m.toString());
-
+			if (args[0].indexOf("PORTLIST") != -1) {
+				listOpenComputerPorts();	
 			}
-			else if (decision.equals("BM")) {
+			else {
+				ArduinoBoard ardu = new ArduinoBoard(args[0]);
+				ardu.connect();
+				Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 
-				BufferedImage screen = rbt.createScreenCapture(screenRect);
-				MarkerDetector md = new MarkerDetector(screen, Marker.BLUE); 
-				md.detect();
-				Marker m = md.getLargestMarker();
+				Robot rbt = new Robot();
 
-				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
-				rbt.mousePress(InputEvent.BUTTON1_MASK);
-				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
-				System.out.println(m.toString());
+				while (ardu.isConnected()) {
+					String decision = ardu.readSerialLine();
+					if (decision.equals("BL") ) {
+						BufferedImage screen = rbt.createScreenCapture(screenRect);
+						MarkerDetector md = new MarkerDetector(screen, Marker.RED); 
+						md.detect();
+						Marker m = md.getLargestMarker();
 
+						System.out.println(m);
+						rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
+						rbt.mousePress(InputEvent.BUTTON1_MASK);
+						rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+
+
+						System.out.println(m.toString());
+
+					}
+					else if (decision.equals("BM")) {
+
+						BufferedImage screen = rbt.createScreenCapture(screenRect);
+						MarkerDetector md = new MarkerDetector(screen, Marker.BLUE); 
+						md.detect();
+						Marker m = md.getLargestMarker();
+
+						rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
+						rbt.mousePress(InputEvent.BUTTON1_MASK);
+						rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+						System.out.println(m.toString());
+
+					}
+					else if (decision.equals("BR")) {
+
+						BufferedImage screen = rbt.createScreenCapture(screenRect);
+						//showIcon(screen);
+						MarkerDetector md = new MarkerDetector(screen, Marker.GREEN); 
+						md.detect();
+						Marker m = md.getLargestMarker();
+
+						rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
+						rbt.mousePress(InputEvent.BUTTON1_MASK);
+						rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+						System.out.println(m.toString());
+
+
+					}
+
+
+				}
 			}
-			else if (decision.equals("BR")) {
-				
-				BufferedImage screen = rbt.createScreenCapture(screenRect);
-				//showIcon(screen);
-				MarkerDetector md = new MarkerDetector(screen, Marker.GREEN); 
-				md.detect();
-				Marker m = md.getLargestMarker();
-
-				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
-				rbt.mousePress(InputEvent.BUTTON1_MASK);
-				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
-				System.out.println(m.toString());
-
-
-			}
-
-
+		}
+		else {
+			System.out.println("USAGE: dashboard.jar [PORT/COMMAND]");
 		}
 		System.exit(0);
 	}
