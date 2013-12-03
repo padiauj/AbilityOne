@@ -1,59 +1,34 @@
-const int buttonL = A5;     
-const int buttonM = A3;     
-const int buttonR = A4;    
-
 char choice = 'U';
+const int[] button = {A5,A4,A3};
+int[] value = {0,0,0};
+int[] previous = {1,1,1};
 
-int left = 0;
-int mid = 0;
-int right = 0;
-
-int leftprev = 1;
-int midprev = 1;
-int rightprev = 1;
 
 void setup() {
-  pinMode(buttonL, INPUT); 
-  pinMode(buttonM, INPUT); 
-  pinMode(buttonR, INPUT); 
+  for (int i=0; i<button.length; i++) {
+    pinMode(button[i],INPUT);
+  }
+
   Serial.begin(9600);  
 }
 
 void loop(){
-  left = digitalRead(buttonL);
-  mid = digitalRead(buttonM);
-  right = digitalRead(buttonR);
   
-  if (left == LOW) {
-    leftprev = 0;
+  for (int i=0; i<button.length; i++) {
+    value[i] = digitalRead(button[i]);
   }
-  
-  if (mid == LOW) {
-    midprev = 0;
-  }
-  
-  if (right == LOW) {
-    rightprev = 0;
-  }
-  
-  if (left == HIGH && leftprev == 0) {
-    Serial.println("BL");
-    leftprev = 1;
 
+  for (int i=0; i<button.length;i++) {
+    if (value[i] == LOW) {
+      previous[i] = 0;
+    }
+    else {
+     if (previous[i] == 0) {
+       Serial.println(i);
+       previous[i] = 1;
+     }
+    }
   }
-  if (mid == HIGH && midprev == 0) {
-    Serial.println("BM"); 
-    midprev = 1;
-   
-  }
-  if (right == HIGH && rightprev == 0) {
-    Serial.println("BR");    
-    rightprev = 1;
-  }
-  
-  
-   
+    
   delay(50);
-
-
 }
