@@ -1,11 +1,10 @@
 char choice = 'U';
-const int[] button = {A5,A4,A3};
-int[] value = {0,0,0};
-int[] previous = {1,1,1};
-
+int button[] = {A5,A4,A3};
+int value[] = {0,0,0};
+int previous[] = {1,1,1};
 
 void setup() {
-  for (int i=0; i<button.length; i++) {
+  for (int i=0; i<sizeof(button); i++) {
     pinMode(button[i],INPUT);
   }
 
@@ -14,11 +13,11 @@ void setup() {
 
 void loop(){
   
-  for (int i=0; i<button.length; i++) {
+  for (int i=0; i<sizeof(button); i++) {
     value[i] = digitalRead(button[i]);
   }
 
-  for (int i=0; i<button.length;i++) {
+  for (int i=0; i<sizeof(button);i++) {
     if (value[i] == LOW) {
       previous[i] = 0;
     }
