@@ -12,6 +12,8 @@ import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -27,18 +29,34 @@ public class ArduinoBoard {
 
 
 
-	public ArduinoBoard(String port) throws NoSuchPortException, PortInUseException, UnsupportedCommOperationException {
+	public ArduinoBoard(String port) {
+		try{
 		this.portIdentifier = CommPortIdentifier.getPortIdentifier(port);
+		}
+		catch (Exception e) {
+			System.err.println("RXTX Library issues.");
+		}
 	}
 
-	public static void listOpenComputerPorts() {
-		java.util.Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+	public static void printOpenComputerPorts() {
+		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
 		while (portEnum.hasMoreElements()) {
 			CommPortIdentifier portIdentifier = portEnum.nextElement();
 			System.out.println(portIdentifier.getName() + " - "
 					+ getPortTypeName(portIdentifier.getPortType()));
 		}
 	}
+	
+	public static ArrayList<String> getOpenPorts() {
+		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
+		ArrayList<String> ports = new ArrayList<String>();
+		while (portEnum.hasMoreElements()) {
+			CommPortIdentifier portIdentifier = portEnum.nextElement();
+			ports.add(portIdentifier.getName());
+		}
+		return ports;
+	}
+
 
 	public static String getPortTypeName(int portType) {
 		switch (portType) {
@@ -57,9 +75,7 @@ public class ArduinoBoard {
 		}
 	}
 
-	public boolean connect() {
-		try {
-
+	public boolean connect() throws UnsupportedCommOperationException, PortInUseException, IOException {
 			if (portIdentifier.isCurrentlyOwned()) {
 				System.err.println("Error: Port is currently in use");
 			} else {
@@ -72,11 +88,8 @@ public class ArduinoBoard {
 						SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
 			}
 			this.in = this.port.getInputStream();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			return false;
-		}
+		
+
 
 		this.setConnected(true);
 		return true;
@@ -128,7 +141,7 @@ public class ArduinoBoard {
 		if (args.length == 1) {
 
 			if (args[0].indexOf("PORTLIST") != -1) {
-				listOpenComputerPorts();	
+				printOpenComputerPorts();	
 			}
 			else {
 				ArduinoBoard ardu = new ArduinoBoard(args[0]);
