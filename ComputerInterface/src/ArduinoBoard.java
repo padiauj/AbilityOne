@@ -1,20 +1,19 @@
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
 import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.UnsupportedCommOperationException;
 
-import java.awt.Rectangle;
-import java.awt.Robot;
-import java.awt.Toolkit;
-import java.awt.event.InputEvent;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -27,11 +26,9 @@ public class ArduinoBoard {
 	private InputStream in;
 	boolean connected;
 
-
-
 	public ArduinoBoard(String port) {
 		try{
-		this.portIdentifier = CommPortIdentifier.getPortIdentifier(port);
+			this.portIdentifier = CommPortIdentifier.getPortIdentifier(port);
 		}
 		catch (Exception e) {
 			System.err.println("RXTX Library issues.");
@@ -46,7 +43,7 @@ public class ArduinoBoard {
 					+ getPortTypeName(portIdentifier.getPortType()));
 		}
 	}
-	
+
 	public static ArrayList<String> getOpenPorts() {
 		Enumeration<CommPortIdentifier> portEnum = CommPortIdentifier.getPortIdentifiers();
 		ArrayList<String> ports = new ArrayList<String>();
@@ -56,7 +53,6 @@ public class ArduinoBoard {
 		}
 		return ports;
 	}
-
 
 	public static String getPortTypeName(int portType) {
 		switch (portType) {
@@ -76,24 +72,20 @@ public class ArduinoBoard {
 	}
 
 	public boolean connect() throws UnsupportedCommOperationException, PortInUseException, IOException {
-			if (portIdentifier.isCurrentlyOwned()) {
-				System.err.println("Error: Port is currently in use");
-			} else {
-				this.port = portIdentifier.open(this.getClass().getName(), 2000);
-			}
+		if (portIdentifier.isCurrentlyOwned()) {
+			System.err.println("Error: Port is currently in use");
+		} else {
+			this.port = portIdentifier.open(this.getClass().getName(), 2000);
+		}
 
-			if (this.port instanceof SerialPort) {
-				this.serialPort = (SerialPort) this.port;
-				this.serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8,
-						SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-			}
-			this.in = this.port.getInputStream();
-		
-
-
+		if (this.port instanceof SerialPort) {
+			this.serialPort = (SerialPort) this.port;
+			this.serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8,
+					SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
+		}
+		this.in = this.port.getInputStream();
 		this.setConnected(true);
 		return true;
-
 	}
 
 	public boolean hasSerial() {
@@ -127,6 +119,7 @@ public class ArduinoBoard {
 		}
 		return sb.toString().trim();
 	}
+	
 	public static void showIcon(BufferedImage image) {
 		ImageIcon icon = new ImageIcon(image);
 		JLabel label = new JLabel(icon, JLabel.CENTER);
@@ -134,74 +127,21 @@ public class ArduinoBoard {
 				"AbilityOne Image Processing", -1);
 	}
 
-
-
 	public static void main(String[] args) throws Exception {
-
-		if (args.length == 1) {
-
-			if (args[0].indexOf("PORTLIST") != -1) {
-				printOpenComputerPorts();	
-			}
-			else {
-				ArduinoBoard ardu = new ArduinoBoard(args[0]);
-				ardu.connect();
-				Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
-
-				Robot rbt = new Robot();
-
-				while (ardu.isConnected()) {
-					String decision = ardu.readSerialLine();
-					if (decision.equals("BL") ) {
-						BufferedImage screen = rbt.createScreenCapture(screenRect);
-						MarkerDetector md = new MarkerDetector(screen, Marker.RED); 
-						md.detect();
-						Marker m = md.getLargestMarker();
-
-						System.out.println(m);
-						rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
-						rbt.mousePress(InputEvent.BUTTON1_MASK);
-						rbt.mouseRelease(InputEvent.BUTTON1_MASK);
-
-
-						System.out.println(m.toString());
-
-					}
-					else if (decision.equals("BM")) {
-
-						BufferedImage screen = rbt.createScreenCapture(screenRect);
-						MarkerDetector md = new MarkerDetector(screen, Marker.BLUE); 
-						md.detect();
-						Marker m = md.getLargestMarker();
-
-						rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
-						rbt.mousePress(InputEvent.BUTTON1_MASK);
-						rbt.mouseRelease(InputEvent.BUTTON1_MASK);
-						System.out.println(m.toString());
-
-					}
-					else if (decision.equals("BR")) {
-
-						BufferedImage screen = rbt.createScreenCapture(screenRect);
-						//showIcon(screen);
-						MarkerDetector md = new MarkerDetector(screen, Marker.GREEN); 
-						md.detect();
-						Marker m = md.getLargestMarker();
-
-						rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
-						rbt.mousePress(InputEvent.BUTTON1_MASK);
-						rbt.mouseRelease(InputEvent.BUTTON1_MASK);
-						System.out.println(m.toString());
-
-					}
-
-
-				}
+		BufferedImage screen = ImageIO.read(new File("test.jpg"));
+		Graphics2D g = screen.createGraphics();
+		MarkerDetector md = null;
+		md = new MarkerDetector(screen, Marker.GREEN);
+		ArrayList<Marker> markers = md.detect();
+		g.setColor(Color.BLACK);
+		System.out.println(markers.size());
+		for (Marker m : markers) {
+			System.out.println(m);
+			if (m != null) {
+				g.fillOval((int)m.getCentroid().getX()-2, (int)m.getCentroid().getY()+2, 2, 2);
+				System.out.println(m);
 			}
 		}
-		else {
-			System.out.println("USAGE: dashboard.jar [PORT/COMMAND]");
-		}
-		System.exit(0);
+		showIcon(screen);
 	}
 }

@@ -26,8 +26,6 @@ public class ArduinoRunnable implements Runnable {
 		this.port = port;
 	}
 
-
-
 	public void run() {
 		Rectangle screenRect = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
 		Robot rbt = null;
@@ -41,7 +39,7 @@ public class ArduinoRunnable implements Runnable {
 		try {
 			ardu = new ArduinoBoard(port);
 			ardu.connect();
-		}
+		} 
 		catch (Exception e) {
 			if (e instanceof PortInUseException) {
 				JOptionPane.showMessageDialog(this.parent,
@@ -56,18 +54,20 @@ public class ArduinoRunnable implements Runnable {
 			BufferedImage screen = rbt.createScreenCapture(screenRect);
 
 			MarkerDetector md = null;
-			if (decision.equals("0") ) {
+			if (decision.equals("A")) {
 				md = new MarkerDetector(screen, Marker.RED);
-			}
-			else {
+			} else {
 				md = new MarkerDetector(screen, Marker.GREEN);
 			}
 
 			md.detect();
+
 			Marker m = md.getLargestMarker();
-			rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
-			rbt.mousePress(InputEvent.BUTTON1_MASK);
-			rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+			if (m != null) {
+				rbt.mouseMove((int)m.getCentroid().getX(), (int)m.getCentroid().getY());
+				rbt.mousePress(InputEvent.BUTTON1_MASK);
+				rbt.mouseRelease(InputEvent.BUTTON1_MASK);
+			}
 
 		}
 	}
